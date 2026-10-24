@@ -3,6 +3,7 @@ from mcp.server.mcpserver import MCPServer
 from dotenv import load_dotenv
 from private_email.models import Message
 from private_email.imap import connect, parse_message
+from private_email.smtp import send
 
 mcp = MCPServer[Any] ("private_email")
 
@@ -63,8 +64,14 @@ def delete_message(message_id: int, folder: str = "INBOX"):
         if message.message_id == message_id:
             messages.remove(message)
 
-def send_message(receiver:str, subject: str, content: str):
-    pass
+@mcp.tool()
+def send_message(receiver:str, subject: str, content: str) -> str:
+    """
+    This function is for sending message to a specific receiver. Use this when the user
+    wants to send a message to someone with a subject and some content. Ask permission before sending.
+    """
+    send(receiver=receiver, subjec=subject, content=content)
+    return f"Message sent successfully to {receiver}!"
 
 def main():
     load_dotenv()
