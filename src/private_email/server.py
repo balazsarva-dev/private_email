@@ -65,12 +65,14 @@ def delete_message(message_id: int, folder: str = "INBOX"):
             messages.remove(message)
 
 @mcp.tool()
-def send_message(receiver:str, subject: str, content: str) -> str:
+def send_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
     """
     This function is for sending message to a specific receiver. Use this when the user
     wants to send a message to someone with a subject and some content. Ask permission before sending.
+    `content` is the plain-text body. Pass `html` as well to send an HTML version
+    (e.g. with a formatted signature); `content` is then the fallback for clients without HTML.
     """
-    send(receiver=receiver, subject=subject, content=content)
+    send(receiver=receiver, subject=subject, content=content, html=html)
     return f"Message sent successfully to {receiver}!"
 
 def main():
