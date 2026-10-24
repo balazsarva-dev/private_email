@@ -70,7 +70,7 @@ def send_message(receiver:str, subject: str, content: str) -> str:
     This function is for sending message to a specific receiver. Use this when the user
     wants to send a message to someone with a subject and some content. Ask permission before sending.
     """
-    send(receiver=receiver, subjec=subject, content=content)
+    send(receiver=receiver, subject=subject, content=content)
     return f"Message sent successfully to {receiver}!"
 
 def main():
