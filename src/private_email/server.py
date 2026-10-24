@@ -1,18 +1,18 @@
 from typing import Any, List
 from mcp.server.mcpserver import MCPServer
-from imaplib import IMAP4
-from pydantic import BaseModel
+from dotenv import load_dotenv
+from private_email.models import Message
+from private_email.imap import connect
 
 mcp = MCPServer[Any] ("private_email")
 
-class Message(BaseModel):
-    message_id : int
-    sender : str
-    receiver : str
-    subject : str
-    content : str
 
 def fetch_messages(folder: str) -> List[Message]:
+    get_connect = connect()
+    get_connect.select(folder)
+    _, data = get_connect.uid("search", None, "ALL")
+    uids = data[0].split()
+    get_connect.logout()
     return [
         Message(message_id=1, sender="Rob", receiver="Kate", 
                 subject="Welcome message", content="Hello Kate, I hope you are doing fine"),
@@ -59,6 +59,6 @@ def send_message(receiver:str, subject: str, content: str):
     msg = Message(receiver=receiver, subject=subject, content=content)
 
 
-if __name__ == "__main__":
+def main():
+    load_dotenv()
     mcp.run()
-

@@ -9,10 +9,11 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "mcp[cli]>=2.3.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.scripts]
-private-email = "private_email:main"
+private-email = "private_email.server:main"
 
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13.0"]
