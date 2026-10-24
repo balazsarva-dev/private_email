@@ -21,6 +21,11 @@ def fetch_messages(folder: str) -> List[Message]:
 
 @mcp.tool()
 def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
+    """
+    List the most recent messages in a folder (default: INBOX), newest first,
+    at most `limit` of them. Use this for an overview, e.g. when the user asks
+    'list my emails', 'what did I get recently' or 'summarize my emails'.
+    """
     messages = fetch_messages(folder)
     result = []
     for message in messages[::-1][:limit]:
@@ -29,6 +34,10 @@ def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
 
 @mcp.tool()
 def read_message(message_id: int, folder: str = "INBOX") -> str:
+    """
+    Return the full text of one specific message by its ID. Use this after
+    list_messages or search_message, when the user wants to read a given email.
+    """
     messages = fetch_messages(folder)
     for message in messages:
         if message.message_id == message_id:
@@ -37,10 +46,14 @@ def read_message(message_id: int, folder: str = "INBOX") -> str:
 
 @mcp.tool()
 def search_message(query: str, folder: str = "INBOX") -> List[Message]:
+    """
+    Find messages whose subject or text contains `query` (case-insensitive).
+    Use this when the user looks for an email about something specific.
+    """
     messages = fetch_messages(folder)
     result = []
     for message in messages:
-        if query in message.content:
+        if query.lower() in message.subject.lower() or query.lower() in message.content.lower():
             result.append(message)
     return result
 
