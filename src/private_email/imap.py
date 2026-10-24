@@ -22,5 +22,6 @@ def parse_message(uid: bytes, raw: bytes) -> Message:
                     sender=msg.get("From", ""),
                     receiver=msg.get("To", ""),
                     subject=msg.get("Subject", ""),
+                    date=msg.get("Date", ""),
                     content=content
     )

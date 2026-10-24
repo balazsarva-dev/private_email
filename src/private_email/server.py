@@ -48,13 +48,16 @@ def read_message(message_id: int, folder: str = "INBOX") -> str:
 @mcp.tool()
 def search_message(query: str, folder: str = "INBOX") -> List[Message]:
     """
-    Find messages whose subject or text contains `query` (case-insensitive).
-    Use this when the user looks for an email about something specific.
+    Find messages whose sender, receiver, subject or text contains `query`
+    (case-insensitive), newest first. Use this when the user looks for an email
+    about something specific, or for emails to/from a given address
+    (e.g. folder "Sent" with the receiver's email address).
     """
     messages = fetch_messages(folder)
     result = []
-    for message in messages:
-        if query.lower() in message.subject.lower() or query.lower() in message.content.lower():
+    for message in messages[::-1]:
+        fields = (message.sender, message.receiver, message.subject, message.content)
+        if any(query.lower() in field.lower() for field in fields):
             result.append(message)
     return result
 
