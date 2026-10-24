@@ -23,7 +23,7 @@ def fetch_messages(folder: str) -> List[Message]:
 def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
     messages = fetch_messages(folder)
     result = []
-    for message in messages[-1:-limit]:
+    for message in messages[::-1][:limit]:
         result.append(message)
     return result
 
