@@ -30,3 +30,22 @@ def send(receiver: str, subject: str, content: str, html: str | None = None) -> 
     imap = connect()
     imap.append("Sent", r"(\Seen)", Time2Internaldate(time.time()), msg.as_bytes())
     imap.logout()
+
+
+def draft(receiver: str, subject: str, content: str, html: str | None = None) -> None:
+    user = os.getenv("PRIVATEEMAIL_USER", "")
+
+    msg = EmailMessage()
+    msg["From"] = user
+    msg["To"] = receiver
+    msg["Subject"] = subject
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain=user.split("@")[-1])
+    msg.set_content(content)
+    if html:
+        msg.add_alternative(html, subtype="html")
+
+    # No SMTP here, the draft only goes to "Drafts" so it can be reviewed and sent from webmail.
+    imap = connect()
+    imap.append("Drafts", r"(\Draft)", Time2Internaldate(time.time()), msg.as_bytes())
+    imap.logout()

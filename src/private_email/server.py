@@ -3,7 +3,7 @@ from mcp.server.mcpserver import MCPServer
 from dotenv import load_dotenv
 from private_email.models import Message
 from private_email.imap import connect, parse_message
-from private_email.smtp import send
+from private_email.smtp import send, draft
 
 mcp = MCPServer[Any] ("private_email")
 
@@ -77,6 +77,17 @@ def send_message(receiver:str, subject: str, content: str, html: str | None = No
     """
     send(receiver=receiver, subject=subject, content=content, html=html)
     return f"Message sent successfully to {receiver}!"
+
+@mcp.tool()
+def draft_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
+    """
+    This function saves a message to the "Drafts" folder without sending it. Use this when the user
+    wants a draft, or wants to review an email in webmail before sending it.
+    `content` is the plain-text body. Pass `html` as well to save an HTML version
+    (e.g. with a formatted signature); `content` is then the fallback for clients without HTML.
+    """
+    draft(receiver=receiver, subject=subject, content=content, html=html)
+    return f"Draft for {receiver} saved to Drafts!"
 
 def main():
     load_dotenv()
