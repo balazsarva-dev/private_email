@@ -61,11 +61,43 @@ def search_message(query: str, folder: str = "INBOX") -> List[Message]:
             result.append(message)
     return result
 
-def delete_message(message_id: int, folder: str = "INBOX"):
-    messages = fetch_messages(folder)
-    for message in messages:
-        if message.message_id == message_id:
-            messages.remove(message)
+@mcp.tool()
+def delete_message(message_id: int, folder: str = "INBOX") -> str:
+    """
+    Permanently delete one specific message by its ID (from list_messages or search_message).
+    Use this when the user wants to delete a given email. Ask permission before deleting,
+    this cannot be undone.
+    """
+    get_connect = connect()
+    get_connect.select(folder)
+    uid = str(message_id)
+    _, data = get_connect.uid("search", None, "UID", uid)
+    if not data[0]:
+        get_connect.logout()
+        return "No message found."
+    get_connect.uid("store", uid, "+FLAGS", r"(\Deleted)")
+    get_connect.expunge()
+    get_connect.logout()
+    return f"Message {message_id} deleted from {folder}."
+
+@mcp.tool()
+def vacuum_folder(folder: str = "Trash") -> str:
+    """
+    Permanently delete all messages in a folder (default: Trash). Use this when the user
+    wants to empty / vacuum the Trash. Ask permission before deleting, this cannot be undone.
+    INBOX, Sent and Drafts are protected and cannot be emptied.
+    """
+    if folder.lower() in ("inbox", "sent", "drafts"):
+        return f"The {folder} folder is protected, nothing was deleted."
+    get_connect = connect()
+    get_connect.select(folder)
+    _, data = get_connect.uid("search", None, "ALL")
+    uids = data[0].split()
+    for uid in uids:
+        get_connect.uid("store", uid, "+FLAGS", r"(\Deleted)")
+    get_connect.expunge()
+    get_connect.logout()
+    return f"{len(uids)} messages deleted from {folder}."
 
 @mcp.tool()
 def send_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
