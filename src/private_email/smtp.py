@@ -1,16 +1,13 @@
-import os
 import time
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 from imaplib import Time2Internaldate
 from smtplib import SMTP_SSL
 from private_email.imap import connect
-
+from private_email.config import HOST, USER, PASSWORD, SMTP_PORT
 
 def send(receiver: str, subject: str, content: str, html: str | None = None) -> None:
-    host = os.getenv("PRIVATEEMAIL_HOST", "")
-    user = os.getenv("PRIVATEEMAIL_USER", "")
-    password = os.getenv("PRIVATEEMAIL_PASSWORD", "")
+    host, user, password, port = HOST, USER, PASSWORD, SMTP_PORT
 
     msg = EmailMessage()
     msg["From"] = user
@@ -22,7 +19,7 @@ def send(receiver: str, subject: str, content: str, html: str | None = None) -> 
     if html:
         msg.add_alternative(html, subtype="html")
 
-    with SMTP_SSL(host, 465) as smtp:
+    with SMTP_SSL(host, port) as smtp:
         smtp.login(user, password)
         smtp.send_message(msg)
 
@@ -33,7 +30,7 @@ def send(receiver: str, subject: str, content: str, html: str | None = None) -> 
 
 
 def draft(receiver: str, subject: str, content: str, html: str | None = None) -> None:
-    user = os.getenv("PRIVATEEMAIL_USER", "")
+    user = USER
 
     msg = EmailMessage()
     msg["From"] = user

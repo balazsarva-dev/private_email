@@ -1,15 +1,13 @@
 from imaplib import IMAP4_SSL
-import os
 from private_email.models import Message
-import email
+from private_email.config import HOST, USER, PASSWORD, IMAP_PORT
 from email import policy
+import email
 
 
 def connect():
-    host = os.getenv("PRIVATEEMAIL_HOST", "")
-    user = os.getenv("PRIVATEEMAIL_USER", "")
-    password = os.getenv("PRIVATEEMAIL_PASSWORD", "")
-    auth = IMAP4_SSL(host, 993)
+    host, user, password, port = HOST, USER, PASSWORD, IMAP_PORT
+    auth = IMAP4_SSL(host, port)
     auth.login(user, password)
     return auth
 

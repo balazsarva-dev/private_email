@@ -1,6 +1,5 @@
 from typing import Any, List
 from mcp.server.mcpserver import MCPServer
-from dotenv import load_dotenv
 from private_email.models import Message
 from private_email.imap import connect, parse_message
 from private_email.smtp import send, draft
@@ -122,5 +121,4 @@ def draft_message(receiver:str, subject: str, content: str, html: str | None = N
     return f"Draft for {receiver} saved to Drafts!"
 
 def main():
-    load_dotenv()
     mcp.run()
