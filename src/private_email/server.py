@@ -1,23 +1,11 @@
 from typing import Any, List
 from mcp.server.mcpserver import MCPServer
 from private_email.models import Message
-from private_email.imap import connect, parse_message
+from private_email.imap import fetch_messages, vacuum, delete
 from private_email.smtp import send, draft
 
 mcp = MCPServer[Any] ("private_email")
 
-
-def fetch_messages(folder: str) -> List[Message]:
-    get_connect = connect()
-    get_connect.select(folder)
-    _, data = get_connect.uid("search", None, "ALL")
-    uids = data[0].split()
-    messages = []
-    for uid in uids:
-        _, data = get_connect.uid("fetch", uid, "(RFC822)")
-        messages.append(parse_message(uid, data[0][1]))
-    get_connect.logout()
-    return messages
 
 @mcp.tool()
 def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
@@ -67,17 +55,11 @@ def delete_message(message_id: int, folder: str = "INBOX") -> str:
     Use this when the user wants to delete a given email. Ask permission before deleting,
     this cannot be undone.
     """
-    get_connect = connect()
-    get_connect.select(folder)
-    uid = str(message_id)
-    _, data = get_connect.uid("search", None, "UID", uid)
-    if not data[0]:
-        get_connect.logout()
-        return "No message found."
-    get_connect.uid("store", uid, "+FLAGS", r"(\Deleted)")
-    get_connect.expunge()
-    get_connect.logout()
-    return f"Message {message_id} deleted from {folder}."
+    result = delete(message_id, folder)
+    if result:
+        return f"Message {message_id} deleted from {folder}."
+    else:
+        return "No deletion succeeded."
 
 @mcp.tool()
 def vacuum_folder(folder: str = "Trash") -> str:
@@ -85,18 +67,11 @@ def vacuum_folder(folder: str = "Trash") -> str:
     Permanently delete all messages in a folder (default: Trash). Use this when the user
     wants to empty / vacuum the Trash. Ask permission before deleting, this cannot be undone.
     INBOX, Sent and Drafts are protected and cannot be emptied.
-    """
+    """ 
     if folder.lower() in ("inbox", "sent", "drafts"):
         return f"The {folder} folder is protected, nothing was deleted."
-    get_connect = connect()
-    get_connect.select(folder)
-    _, data = get_connect.uid("search", None, "ALL")
-    uids = data[0].split()
-    for uid in uids:
-        get_connect.uid("store", uid, "+FLAGS", r"(\Deleted)")
-    get_connect.expunge()
-    get_connect.logout()
-    return f"{len(uids)} messages deleted from {folder}."
+    count = vacuum(folder)
+    return f"{count} messages deleted from {folder}."
 
 @mcp.tool()
 def send_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
