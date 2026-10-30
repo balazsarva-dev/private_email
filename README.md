@@ -55,3 +55,5 @@ cp .env.example .env
 ```bash
 claude mcp add private-email -s user -- uv run --project $(pwd) private-email
 ```
+
+5. Restart Claude Code, then run `/mcp` to check that the `private-email` server is connected.
