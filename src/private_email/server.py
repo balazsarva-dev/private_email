@@ -6,7 +6,7 @@ from private_email.smtp import send, draft
 
 mcp = MCPServer[Any] ("private_email")
 
-
+# This function lists the most recent messages in a mailbox.
 @mcp.tool()
 def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
     """
@@ -20,6 +20,7 @@ def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
         result.append(message)
     return result
 
+# This function reads a message from a mailbox.
 @mcp.tool()
 def read_message(message_id: int, folder: str = "INBOX") -> str:
     """
@@ -32,6 +33,7 @@ def read_message(message_id: int, folder: str = "INBOX") -> str:
             return message.content
     return "No message found."
 
+# This function searches for a message in a mailbox.
 @mcp.tool()
 def search_message(query: str, folder: str = "INBOX") -> List[Message]:
     """
@@ -48,6 +50,7 @@ def search_message(query: str, folder: str = "INBOX") -> List[Message]:
             result.append(message)
     return result
 
+# This function deletes a message from a mailbox.
 @mcp.tool()
 def delete_message(message_id: int, folder: str = "INBOX") -> str:
     """
@@ -61,6 +64,7 @@ def delete_message(message_id: int, folder: str = "INBOX") -> str:
     else:
         return "No deletion succeeded."
 
+# This function vacuums a mailbox.
 @mcp.tool()
 def vacuum_folder(folder: str = "Trash") -> str:
     """
@@ -73,6 +77,7 @@ def vacuum_folder(folder: str = "Trash") -> str:
     count = vacuum(folder)
     return f"{count} messages deleted from {folder}."
 
+# This function sends a message to a specific receiver.
 @mcp.tool()
 def send_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
     """
@@ -84,6 +89,7 @@ def send_message(receiver:str, subject: str, content: str, html: str | None = No
     send(receiver=receiver, subject=subject, content=content, html=html)
     return f"Message sent successfully to {receiver}!"
 
+# This function saves a message to the "Drafts" folder without sending it.
 @mcp.tool()
 def draft_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
     """
@@ -95,5 +101,6 @@ def draft_message(receiver:str, subject: str, content: str, html: str | None = N
     draft(receiver=receiver, subject=subject, content=content, html=html)
     return f"Draft for {receiver} saved to Drafts!"
 
+# This function runs the MCP server.
 def main():
     mcp.run()

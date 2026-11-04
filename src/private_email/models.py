@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+# This class represents a message.
 class Message(BaseModel):
     message_id : int = Field(description="Message identification number")
     sender : str = Field(description="Message sender")

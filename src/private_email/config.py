@@ -1,3 +1,7 @@
+# src/private_email/config.py
+# This file contains the configuration for the private email server.
+# It is used to store the credentials for the email server.
+
 import os
 from dotenv import load_dotenv
 

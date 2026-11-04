@@ -6,12 +6,13 @@ import email
 from typing import List
 from contextlib import contextmanager
 
+# This function creates a connection to the email server.
 def connect():
-    host, user, password, port = HOST, USER, PASSWORD, IMAP_PORT
-    auth = IMAP4_SSL(host, port)
-    auth.login(user, password)
-    return auth
+    make_connection = IMAP4_SSL(HOST, IMAP_PORT)
+    make_connection.login(USER, PASSWORD)
+    return make_connection
 
+# This function creates a context manager for a mailbox.
 @contextmanager
 def mailbox(folder: str):
     imap = connect()
@@ -21,6 +22,7 @@ def mailbox(folder: str):
     finally:
         imap.logout()
 
+# This function fetches all messages from a mailbox.
 def fetch_messages(folder: str) -> List[Message]:
     with mailbox(folder) as imap:
         _, data = imap.uid("search", None, "ALL")
@@ -28,9 +30,11 @@ def fetch_messages(folder: str) -> List[Message]:
         messages = []
         for uid in uids:
             _, data = imap.uid("fetch", uid, "(RFC822)")
-            messages.append(parse_message(uid, data[0][1]))
+            parsed_message = parse_message(uid, data[0][1])
+            messages.append(parsed_message)
     return messages
 
+# This function parses a message from a raw email.
 def parse_message(uid: bytes, raw: bytes) -> Message:
     msg = email.message_from_bytes(raw, policy=policy.default)
     body = msg.get_body(preferencelist=("plain", "html"))
@@ -44,6 +48,7 @@ def parse_message(uid: bytes, raw: bytes) -> Message:
                     content=content
     )
 
+# This function vacuums a mailbox.
 def vacuum(folder: str) -> int:
     with mailbox(folder) as imap:
         _, data = imap.uid("search", None, "ALL")
@@ -54,6 +59,7 @@ def vacuum(folder: str) -> int:
         imap.expunge()
         return count
 
+# This function deletes a message from a mailbox.
 def delete(message_id: int, folder: str) -> bool:
     with mailbox(folder) as imap:
         uid = str(message_id)
