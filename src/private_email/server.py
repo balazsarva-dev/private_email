@@ -14,9 +14,10 @@ def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
     at most `limit` of them. Use this for an overview, e.g. when the user asks
     'list my emails', 'what did I get recently' or 'summarize my emails'.
     """
-    messages = fetch_messages(folder)
+    messages = fetch_messages(folder, limit)
     result = []
     for message in messages[::-1][:limit]:
+        message.content = message.content[:200]
         result.append(message)
     return result
 
@@ -81,13 +82,15 @@ def vacuum_folder(folder: str = "Trash") -> str:
 @mcp.tool()
 def send_message(receiver:str, subject: str, content: str, html: str | None = None) -> str:
     """
-    This function is for sending message to a specific receiver. Use this when the user
+    This function sends a message to a specific receiver. Use this when the user
     wants to send a message to someone with a subject and some content. Ask permission before sending.
     `content` is the plain-text body. Pass `html` as well to send an HTML version
     (e.g. with a formatted signature); `content` is then the fallback for clients without HTML.
     """
-    send(receiver=receiver, subject=subject, content=content, html=html)
-    return f"Message sent successfully to {receiver}!"
+    saved = send(receiver=receiver, subject=subject, content=content, html=html)
+    if saved:
+        return f"Message sent successfully to {receiver}!"
+    return f"Message sent to {receiver}, but was not saved to the Sent folder. Do not send it again!"
 
 # This function saves a message to the "Drafts" folder without sending it.
 @mcp.tool()

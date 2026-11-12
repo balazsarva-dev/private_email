@@ -16,23 +16,31 @@ def connect():
 @contextmanager
 def mailbox(folder: str):
     imap = connect()
-    imap.select(folder)
     try:
+        status, _ = imap.select(folder)
+        if status != "OK":
+            raise ValueError(f"Folder not found: {folder}")
         yield imap
     finally:
         imap.logout()
 
 # This function fetches all messages from a mailbox.
-def fetch_messages(folder: str) -> List[Message]:
+def fetch_messages(folder: str, limit: int | None = None) -> List[Message]:
     with mailbox(folder) as imap:
-        _, data = imap.uid("search", None, "ALL")
-        uids = data[0].split()
+        uids = all_uids(imap)
         messages = []
+        if limit:
+            uids = uids[-limit:]
         for uid in uids:
-            _, data = imap.uid("fetch", uid, "(RFC822)")
+            _, data = imap.uid("fetch", uid, "(BODY.PEEK[])")
             parsed_message = parse_message(uid, data[0][1])
             messages.append(parsed_message)
     return messages
+
+def all_uids(imap) -> List[bytes]:
+    _, data = imap.uid("search", None, "ALL")
+    uids = data[0].split()
+    return uids
 
 # This function parses a message from a raw email.
 def parse_message(uid: bytes, raw: bytes) -> Message:
@@ -51,8 +59,7 @@ def parse_message(uid: bytes, raw: bytes) -> Message:
 # This function vacuums a mailbox.
 def vacuum(folder: str) -> int:
     with mailbox(folder) as imap:
-        _, data = imap.uid("search", None, "ALL")
-        uids = data[0].split()
+        uids = all_uids(imap)
         count = len(uids)
         for uid in uids:
             imap.uid("store", uid, "+FLAGS", r"(\Deleted)")
