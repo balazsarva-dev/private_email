@@ -37,10 +37,21 @@ def fetch_messages(folder: str, limit: int | None = None) -> List[Message]:
             messages.append(parsed_message)
     return messages
 
+
 def all_uids(imap) -> List[bytes]:
     _, data = imap.uid("search", None, "ALL")
     uids = data[0].split()
     return uids
+
+
+def fetch_message(message_id: int, folder: str) -> Message | None:
+    with mailbox(folder) as imap:
+        uid = str(message_id)
+        _, data = imap.uid("fetch", uid, "(BODY.PEEK[])")
+        if not data or data[0] is None:
+            return None
+        return parse_message(uid.encode(), data[0][1])
+
 
 # This function parses a message from a raw email.
 def parse_message(uid: bytes, raw: bytes) -> Message:
@@ -74,5 +85,5 @@ def delete(message_id: int, folder: str) -> bool:
         if not data[0]:
             return False
         imap.uid("store", uid, "+FLAGS", r"(\Deleted)")
-        imap.expunge()
+        imap.uid("expunge", uid)
         return True

@@ -1,7 +1,7 @@
 from typing import Any, List
 from mcp.server.mcpserver import MCPServer
 from private_email.models import Message
-from private_email.imap import fetch_messages, vacuum, delete
+from private_email.imap import fetch_messages, fetch_message, vacuum, delete
 from private_email.smtp import send, draft
 
 mcp = MCPServer[Any] ("private_email")
@@ -12,7 +12,8 @@ def list_messages(folder: str = "INBOX", limit: int = 10) -> List[Message]:
     """
     List the most recent messages in a folder (default: INBOX), newest first,
     at most `limit` of them. Use this for an overview, e.g. when the user asks
-    'list my emails', 'what did I get recently' or 'summarize my emails'.
+    'list my emails', 'what did I get recently' or 'summarize my emails'. 
+    Content is only a 200-character preview, use read_message for the full text.
     """
     messages = fetch_messages(folder, limit)
     result = []
@@ -28,11 +29,11 @@ def read_message(message_id: int, folder: str = "INBOX") -> str:
     Return the full text of one specific message by its ID. Use this after
     list_messages or search_message, when the user wants to read a given email.
     """
-    messages = fetch_messages(folder)
-    for message in messages:
-        if message.message_id == message_id:
-            return message.content
-    return "No message found."
+    message = fetch_message(message_id, folder)
+    if not message:
+        return "No message found."
+    return message.content
+    
 
 # This function searches for a message in a mailbox.
 @mcp.tool()
