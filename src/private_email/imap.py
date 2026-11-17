@@ -2,6 +2,7 @@ from imaplib import IMAP4_SSL
 from private_email.models import Message
 from private_email.config import HOST, USER, PASSWORD, IMAP_PORT
 from email import policy
+from email.message import EmailMessage
 import email
 from typing import List
 from contextlib import contextmanager
@@ -51,6 +52,15 @@ def fetch_message(message_id: int, folder: str) -> Message | None:
         if not data or data[0] is None:
             return None
         return parse_message(uid.encode(), data[0][1])
+
+
+def fetch_original(message_id: int, folder: str) -> EmailMessage | None:
+    with mailbox(folder) as imap:
+        uid = str(message_id)
+        _, data = imap.uid("fetch", uid, "(BODY.PEEK[])")
+        if not data or data[0] is None:
+            return None
+        return email.message_from_bytes(data[0][1], policy=policy.default)
 
 
 # This function parses a message from a raw email.

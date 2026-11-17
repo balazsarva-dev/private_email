@@ -2,7 +2,7 @@ from typing import Any, List
 from mcp.server.mcpserver import MCPServer
 from private_email.models import Message
 from private_email.imap import fetch_messages, fetch_message, vacuum, delete
-from private_email.smtp import send, draft
+from private_email.smtp import send, draft, reply
 
 mcp = MCPServer[Any] ("private_email")
 
@@ -92,6 +92,18 @@ def send_message(receiver:str, subject: str, content: str, html: str | None = No
     if saved:
         return f"Message sent successfully to {receiver}!"
     return f"Message sent to {receiver}, but was not saved to the Sent folder. Do not send it again!"
+
+@mcp.tool()
+def reply_message(message_id: int, content: str, folder: str = "INBOX", html: str | None = None) -> str:
+    """
+    This function replies to a concrete email. Use this when user wants to reply to a specific message, 
+    the reply stays in the same conversation. The 'message_id' parameter comes from the 'list_messages' or
+    the 'search_message' tool calling. Ask permission before sending!
+    """
+    saved = reply(message_id=message_id, folder=folder, content=content, html=html)
+    if saved:
+        return "Reply message sent successfully"
+    return "Reply message sent, but not saved. Do not send this again!"
 
 # This function saves a message to the "Drafts" folder without sending it.
 @mcp.tool()
