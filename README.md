@@ -60,8 +60,13 @@ claude mcp add private-email -s user -- uv run --project $(pwd) private-email
 5. Restart Claude Code, then run `/mcp` to check that the `private-email` server is connected.
 
 
-6. PRECAUTIONS or SOLUTION for PASSWORD ISSUE:
-```text 
-Namecheap Private Email: use an app password, not your webmail password. Create one in webmail under Settings → Launch Security Center → App passwords. After you change your webmail password, the old one stops working for IMAP/SMTP and the new one is rejected with AUTHENTICATIONFAILED.
-After setting up the application password you must use /mcp command in Claude Code, then select reconnect!
-```
+6. Troubleshooting: password errors
+
+> [!IMPORTANT]
+> **Namecheap Private Email:** use an *app password*, not your webmail password.
+> Create one in webmail under **Settings → Launch Security Center → App passwords**.
+>
+> After you change your webmail password, the old one stops working for IMAP/SMTP,
+> and the new one is rejected with `AUTHENTICATIONFAILED`.
+>
+> After updating the password in `.env`, run `/mcp` in Claude Code and select **Reconnect**.
