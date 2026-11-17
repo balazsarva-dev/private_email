@@ -1,5 +1,9 @@
 # private_email – MCP server for Private Email
 
+
+https://github.com/user-attachments/assets/89219d41-23dd-43f9-b88d-179b2d2415b3
+
+
 ## 1. What is this used for?
 
 This MCP server connects Claude Code to your Private Email (privateemail.com) mailbox.
